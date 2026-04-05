@@ -1,4 +1,4 @@
-# 📊 SpectraSurvey - Intensive Analysis (Technical + Business)
+# 📋 SpectraSurvey - Intensive Analysis (Technical + Business)
 
 ---
 
