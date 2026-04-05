@@ -50,12 +50,6 @@
 - enabling team and organization administration with audit and compliance visibility,
 - supporting centralized super-admin operations across tenants.
 
-The product is already feature-rich and operationally valuable, but it still carries architectural complexity due to a mixed runtime model:
-- **Express + MySQL** as the main backend foundation,
-- **direct Supabase usage** still present in parts of the frontend and legacy flows.
-
-This hybrid model increases maintenance cost, raises testing complexity, and introduces long-term consistency risks.
-
 ---
 
 ## 🎯 Application Purpose
