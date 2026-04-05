@@ -28,7 +28,6 @@
    - [Technical Map (System)](#52-technical-map-system)
    - [Frontend Component Architecture](#53-frontend-component-architecture)
    - [Express Backend (Functional Zones)](#54-express-backend-functional-zones)
-   - [Hybrid Architecture (Current State)](#55-hybrid-architecture-current-state)
 6. [🔄 Technical Flow Map](#-technical-flow-map)
    - [Login Flow](#61-login-flow-simplified)
    - [Public Survey Submit Flow](#62-public-survey-submit-flow)
@@ -198,14 +197,7 @@ flowchart LR
 - **Frontend**: React + TypeScript + Vite.
 - **UI / Routing**: React Router, modular domain pages.
 - **Backend API**: Node.js + Express + security middleware.
-- **Database**: MySQL (`backend/schema.sql`).
-- **Cloud services still referenced in code**: Supabase (DB / Storage / Edge Functions).
-
-### 5.1.1 Backend Runtime Flag (QA/CI)
-
-- `RUN_BACKGROUND_WORKERS=true` *(default)*: periodic workers run normally (audit, backup, lifecycle).
-- `RUN_BACKGROUND_WORKERS=false`: background workers are disabled; recommended for deterministic QA/E2E and CI runs.
-- `backend/scripts/qa-e2e-checklist.js` sets `RUN_BACKGROUND_WORKERS=false` when starting the test backend.
+- **Database**: MySQL
 
 ### 5.2 Technical Map (System)
 
@@ -217,7 +209,6 @@ flowchart TD
   API --> FS["Local File Storage"];
   API --> Workers["Background Workers"];
   Workers --> Email["Email Notifications"];
-  FE -. legacy paths .-> Supabase["Supabase (Legacy Direct Usage)"];
 ```
 
 ### 5.3 Frontend Component Architecture
@@ -235,19 +226,6 @@ flowchart TD
 - Organization, member, and role endpoints.
 - Audit, security, and admin routes.
 - Worker jobs for backups, cleanup, and observability.
-
-### 5.5 Hybrid Architecture (Current State)
-
-The application currently operates with two architectural paradigms:
-
-- **Model A**: `frontend -> service layer -> Express -> MySQL`
-- **Model B**: `frontend -> Supabase direct (queries / storage / functions)` in legacy paths
-
-**Impact:**
-- potential UI/API mismatches,
-- duplicated data access logic,
-- increased testing complexity,
-- harder long-term maintenance.
 
 ---
 
