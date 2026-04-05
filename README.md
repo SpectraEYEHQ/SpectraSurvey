@@ -1,7 +1,5 @@
 # 📊 SpectraSurvey - Intensive Analysis (Technical + Business)
 
-> **Source:** current workspace codebase at `c:\Users\Legion\Desktop\SpectraEYE_Survey`
-
 ---
 
 ## 📑 Table of Contents
