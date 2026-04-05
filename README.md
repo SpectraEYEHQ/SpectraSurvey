@@ -1,4 +1,6 @@
-# 📋 SpectraSurvey - Intensive Analysis (Technical + Business)
+# 📊 SpectraSurvey - Intensive Analysis (Technical + Business)
+
+> **Source:** current workspace codebase at `c:\Users\Legion\Desktop\SpectraEYE_Survey`
 
 ---
 
@@ -38,13 +40,7 @@
    - [High-Level ER (Mermaid)](#72-high-level-er-mermaid)
    - [Multi-Tenancy](#73-multi-tenancy)
 8. [🧩 Product Offering](#-product-offering)
-9. [⚠️ Critical Observations (Risks and Gaps)](#️-critical-observations-risks-and-gaps)
-   - [Integration Inconsistencies](#91-integration-inconsistencies)
-   - [Operational Risks](#92-operational-risks)
-   - [Branding and UX Consistency](#93-branding-and-ux-consistency)
-10. [🛠️ Consolidation Recommendations](#️-consolidation-recommendations)
-11. [📈 Recommended KPIs](#-recommended-kpis)
-12. [✅ Conclusion](#-conclusion)
+9.  [License](#-license)
 
 ---
 
@@ -122,3 +118,247 @@ flowchart LR
   L --> M["Organizations"];
   L --> N["Users"];
   L --> O["Compliance / Monitoring"];
+```
+
+---
+
+## ✨ Application Features
+
+### 4.1 Authentication, Identity, Security
+
+- 🔐 Login, signup, reset, and MFA flow.
+- 👤 Separate contexts for standard users and super-admin.
+- 🕓 Login history and security event visibility.
+- ✉️ Organization confirmation and invite flows.
+- 🚦 Rate limiting on authentication endpoints.
+
+### 4.2 Full Survey Lifecycle
+
+- 📝 Create, edit, and delete surveys.
+- 🧱 Question builder with types, logic, and ordering.
+- 🗓️ Scheduling and lifecycle controls (start, end, archive, trash).
+- 💾 Auto-save draft and recovery support.
+
+### 4.3 Response Collection (Public/Private)
+
+- 🌍 Public survey pages with access guards.
+- 🔒 Password-protected surveys and additional validation flows.
+- 👥 Invitation-based and group-based distribution.
+- 🛡️ Anti-abuse controls such as captcha or challenge flows where applicable.
+
+### 4.4 Analytics and Reporting
+
+- 📊 Overview dashboard and response trends.
+- 🔎 Individual response inspection.
+- 🔁 Cross-survey comparisons.
+- 📤 Export options such as CSV, Excel, and PDF where enabled.
+
+### 4.5 Groups, Invitations, Distribution
+
+- 🧩 Audience segmentation through groups.
+- ✉️ Invitation lifecycle: send, resend, expire, complete.
+- 🔗 Share links and QR-based distribution.
+
+### 4.6 File Module (DAM)
+
+- 📁 Folder and file hierarchy.
+- 🕘 File versioning with auto/manual version history.
+- 🔐 Secure sharing options:
+  - expiration,
+  - maximum downloads,
+  - password protection,
+  - email delivery.
+
+### 4.7 Team and Organization Settings
+
+- 👥 Team invite, remove, and role change flows.
+- 🔐 Per-user MFA toggle.
+- 🎨 Organization branding such as name and logo.
+- ⚙️ Organization-level policies and settings.
+
+### 4.8 Platform Admin (Super Admin)
+
+- 🏢 Organization management.
+- 👤 User management and privilege elevation.
+- 📈 Platform reports and global controls.
+- 📝 Release notes and version management.
+- 🛡️ Global audit and compliance views.
+
+### 4.9 Audit and Compliance
+
+- 📋 Activity logs by organization.
+- 🚨 Security event timeline.
+- 🔑 Login history views.
+- 💓 Operational telemetry and health visibility.
+
+---
+
+## 🏗️ Technical Architecture
+
+### 5.1 Technology Stack
+
+- **Frontend**: React + TypeScript + Vite.
+- **UI / Routing**: React Router, modular domain pages.
+- **Backend API**: Node.js + Express + security middleware.
+- **Database**: MySQL (`backend/schema.sql`).
+- **Cloud services still referenced in code**: Supabase (DB / Storage / Edge Functions).
+
+### 5.1.1 Backend Runtime Flag (QA/CI)
+
+- `RUN_BACKGROUND_WORKERS=true` *(default)*: periodic workers run normally (audit, backup, lifecycle).
+- `RUN_BACKGROUND_WORKERS=false`: background workers are disabled; recommended for deterministic QA/E2E and CI runs.
+- `backend/scripts/qa-e2e-checklist.js` sets `RUN_BACKGROUND_WORKERS=false` when starting the test backend.
+
+### 5.2 Technical Map (System)
+
+```mermaid
+flowchart TD
+  Browser["Browser / SPA"] --> FE["React Frontend"];
+  FE --> API["Express API /api & /api/v2"];
+  API --> DB["MySQL"];
+  API --> FS["Local File Storage"];
+  API --> Workers["Background Workers"];
+  Workers --> Email["Email Notifications"];
+  FE -. legacy paths .-> Supabase["Supabase (Legacy Direct Usage)"];
+```
+
+### 5.3 Frontend Component Architecture
+
+- 🧭 Domain-oriented pages in `src/pages/*`
+- 🧩 Reusable UI components in `src/components/*`
+- 🔌 API and services layer in `src/services/*`
+- 🪝 Hooks for data fetching and mutations in `src/hooks/*`
+
+### 5.4 Express Backend (Functional Zones)
+
+- Auth, session, and token flows.
+- Survey management and public submission endpoints.
+- File, folder, version, and share endpoints.
+- Organization, member, and role endpoints.
+- Audit, security, and admin routes.
+- Worker jobs for backups, cleanup, and observability.
+
+### 5.5 Hybrid Architecture (Current State)
+
+The application currently operates with two architectural paradigms:
+
+- **Model A**: `frontend -> service layer -> Express -> MySQL`
+- **Model B**: `frontend -> Supabase direct (queries / storage / functions)` in legacy paths
+
+**Impact:**
+- potential UI/API mismatches,
+- duplicated data access logic,
+- increased testing complexity,
+- harder long-term maintenance.
+
+---
+
+## 🔄 Technical Flow Map
+
+### 6.1 Login Flow (Simplified)
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Frontend
+  participant API
+  participant DB
+
+  User->>Frontend: Submit credentials
+  Frontend->>API: POST /api/auth/login
+  API->>DB: Validate user + membership
+  DB-->>API: User + org context
+  API-->>Frontend: Session cookies / auth response
+  Frontend-->>User: Authenticated session
+```
+
+### 6.2 Public Survey Submit Flow
+
+```mermaid
+sequenceDiagram
+  participant Respondent
+  participant Frontend
+  participant API
+  participant DB
+
+  Respondent->>Frontend: Open public survey URL
+  Frontend->>API: GET /api/v2/public/surveys/:id
+  API->>DB: Validate visibility and schedule
+  DB-->>API: Survey payload
+  API-->>Frontend: Survey + questions
+  Respondent->>Frontend: Submit answers
+  Frontend->>API: POST /api/v2/public/surveys/:id/submit
+  API->>DB: Persist response + audit/security events
+  API-->>Frontend: Submission success
+```
+
+### 6.3 Secure File Sharing Flow
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Frontend
+  participant API
+  participant Storage
+
+  User->>Frontend: Create share link
+  Frontend->>API: POST /api/files/:id/share
+  API->>API: Apply ACL, expiry, and download limits
+  API-->>Frontend: Signed/public link metadata
+  Respondent->>API: GET shared file endpoint
+  API->>Storage: Validate link + stream file
+  API-->>Respondent: File download
+```
+
+---
+
+## 🗃️ Data Architecture
+
+### 7.1 Data Domains
+
+- **Identity and Access**: users, organization memberships, roles.
+- **Survey Domain**: surveys, questions, responses, invitations.
+- **File Domain**: folders, files, versions, shares, logs.
+- **Governance Domain**: audit logs, security events, cron logs, reports.
+
+### 7.2 High-Level ER (Mermaid)
+
+```mermaid
+erDiagram
+  ORGANIZATIONS ||--o{ USERS : has
+  ORGANIZATIONS ||--o{ SURVEYS : owns
+  SURVEYS ||--o{ SURVEY_QUESTIONS : contains
+  SURVEYS ||--o{ SURVEY_RESPONSES : receives
+  ORGANIZATIONS ||--o{ FILES : owns
+  FILES ||--o{ FILE_VERSIONS : versions
+  ORGANIZATIONS ||--o{ AUDIT_LOGS : emits
+  ORGANIZATIONS ||--o{ SECURITY_EVENTS : emits
+```
+
+### 7.3 Multi-Tenancy
+
+- Most domains are organization-scoped.
+- Isolation is implemented through schema structure and server-side access checks.
+- Strict regression testing is required for every tenant route and hook to avoid cross-organization leakage.
+
+---
+
+## 🧩 Product Offering
+
+- **Research Engine**: advanced survey creation and execution.
+- **Insight Engine**: analytics and reporting.
+- **Collaboration Engine**: teams, roles, organization settings.
+- **File Governance Engine**: secure file management and sharing.
+- **Control Plane**: global admin, audit, compliance, and monitoring.
+
+---
+
+## 📄 License
+
+Distributed under the Proprietary License. See `LICENSE` for more information.
+
+---
+
+<p align="center">
+  **Built with ❤️ by the SpectraEYE Team**
+</p>
