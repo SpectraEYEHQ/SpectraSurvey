@@ -37,7 +37,7 @@
    - [High-Level ER (Mermaid)](#72-high-level-er-mermaid)
    - [Multi-Tenancy](#73-multi-tenancy)
 8. [🧩 Product Offering](#-product-offering)
-9.  [License](#-license)
+9. [📄 License](#-license)
 
 ---
 
